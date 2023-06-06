@@ -12,7 +12,7 @@ defmodule Chat.Message do
      %__MODULE__{
        author: user,
        message: message,
-       timestamp: NaiveDateTime.local_now(),
+       timestamp: NaiveDateTime.utc_now(),
        recipient: recipient
      }}
   end

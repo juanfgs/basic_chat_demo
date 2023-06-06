@@ -34,13 +34,47 @@ defmodule ChatTest do
 
   describe "get_messages/1" do
     setup do
-      {:ok, pid} = Chat.start_link(%{timeout: 50})
+      {:ok, pid} = Chat.start_link(%{timeout: :infinity})
       [pid: pid]
     end
 
     test "it returns a list of messages ", %{pid: pid} do
       {:ok, messages} = Chat.get_messages(pid)
       assert messages == [messages: []]
+    end
+
+    test "messages will appear ordered by timestamp timestamp ", %{pid: pid} do
+      {:ok, caleb} =
+        pid
+        |> Chat.register_user(name: "Caleb", ip: "127.0.0.1", role: :admin)
+
+      {:ok, duke} =
+        pid
+        |> Chat.register_user(name: "Duke", ip: "127.0.0.1", role: :admin)
+
+      spawn(fn ->
+        ["I live again!!", "Good? bad? I'm the guy with the gun!!", "Rest in pieces"]
+        |> Enum.each(fn msg ->
+          :timer.sleep(:rand.uniform(250))
+          Chat.send_message(pid, caleb, msg)
+        end)
+      end)
+
+      spawn(fn ->
+        ["I'm here to kick *** and chew bubblegum", "and I'm all out of gum", "Groovy!"]
+        |> Enum.each(fn msg ->
+          :timer.sleep(:rand.uniform(10))
+          Chat.send_message(pid, duke, msg)
+        end)
+      end)
+
+      :timer.sleep(300)
+      {:ok, [messages: messages]} = Chat.get_messages(pid)
+
+      assert NaiveDateTime.compare(
+               List.first(messages).timestamp,
+               List.last(messages).timestamp
+             ) == :gt
     end
   end
 
@@ -57,7 +91,7 @@ defmodule ChatTest do
 
       Chat.send_message(pid, user, "I live again!!")
       {:ok, messages} = Chat.get_messages(pid)
-      assert  [messages: [%Chat.Message{message: "I live again!!"}]] = messages
+      assert [messages: [%Chat.Message{message: "I live again!!"}]] = messages
     end
 
     test "Messages include a reference to the author ", %{pid: pid} do
