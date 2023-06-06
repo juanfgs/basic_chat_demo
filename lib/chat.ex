@@ -28,6 +28,10 @@ defmodule Chat do
     GenServer.call(pid, :get_messages)
   end
 
+  @spec send_message(pid(), User.t(), String.t()) :: {:ok} | {:error, atom}
+  def send_message(pid, user, message) do
+    GenServer.call(pid, {:send_message, user, message})
+  end
 
   # Server Callbacks
   @spec init(initial_arguments()) :: {:ok, server_state, any} | {:stop, any}
@@ -54,6 +58,9 @@ defmodule Chat do
   def handle_call(:get_messages, _from, state) do
     {:reply, {:ok, [messages: state.messages]}, state, state.settings.timeout}
   end
-  
-  
+
+  def handle_call({:send_message, user, msg}, _from, state) do
+    {:ok, new_state} = State.append_message(state, user, msg)
+    {:reply, :ok, new_state, new_state.settings.timeout}
+  end
 end
