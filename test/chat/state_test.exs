@@ -26,7 +26,7 @@ defmodule Chat.StateTest do
       state: %Chat.State{users: [user]} = state
     } do
       {:ok, state} = Chat.State.append_message(state, user, "I live Again!!")
-      assert List.first(state.messages) == "I live Again!!" 
+      assert List.first(state.messages).message == "I live Again!!" 
     end
   end
 end

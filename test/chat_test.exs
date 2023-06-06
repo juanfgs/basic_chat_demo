@@ -57,7 +57,7 @@ defmodule ChatTest do
 
       Chat.send_message(pid, user, "I live again!!")
       {:ok, messages} = Chat.get_messages(pid)
-      assert messages == [messages: [%Chat.Message{message: "I live again!!"}]]
+      assert  [messages: [%Chat.Message{message: "I live again!!"}]] = messages
     end
 
     test "Messages include a reference to the author ", %{pid: pid} do
