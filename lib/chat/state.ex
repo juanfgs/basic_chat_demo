@@ -15,28 +15,30 @@ defmodule Chat.State do
     end)
   end
 
-  @spec register_user(t(), Chat.User.t()) :: {:ok, t()} | {:error, atom}
+  @spec register_user(t(), User.t()) :: {:ok, t()} | {:error, atom}
   def register_user(%__MODULE__{users: users} = state, user) do
     unless username_exists?(state, user.name) do
-      {:ok, %__MODULE__{state | users: [user |  users]}}
+      {:ok, %__MODULE__{state | users: [user | users]}}
     else
       {:error, :username_already_taken}
     end
   end
 
-  @spec unregister_user(t(), Chat.User.t()) :: {:ok, t()} | {:error, atom}
+  @spec unregister_user(t(), User.t()) :: {:ok, t()} | {:error, atom}
   def unregister_user(%__MODULE__{users: users} = state, user) do
     if username_exists?(state, user.name) do
-      filtered_users = Enum.reject(users, fn u ->
-        u.name == user.name && u.ip == user.ip
-      end)
+      filtered_users =
+        Enum.reject(users, fn u ->
+          u.name == user.name && u.ip == user.ip
+        end)
+
       {:ok, %__MODULE__{state | users: filtered_users}}
     else
       {:error, :user_not_found}
     end
   end
 
-  @spec append_message(t(), Chat.User.t(), String.t()) :: {:ok, t()} | {:error, atom}
+  @spec append_message(t(), User.t(), String.t()) :: {:ok, t()} | {:error, atom}
   def append_message(%__MODULE__{messages: messages} = state, user, message) do
     if username_exists?(state, user.name) do
       {:ok, new_message} = Message.new(user, message)

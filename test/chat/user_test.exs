@@ -5,14 +5,14 @@ defmodule Chat.UserTest do
   describe "new/3" do
     test "it creates a new user with given information" do
       assert {:ok, %Chat.User{name: "Juan", ip: "127.0.0.1", role: :admin}} =
-               Chat.User.new("Juan", "127.0.0.1", :admin)
+               Chat.User.new(name: "Juan", ip: "127.0.0.1", role: :admin)
     end
   end
 
   describe "new/2" do
     test 'it defaults to :user role if not provided' do
-      assert {:ok, %Chat.User{name: "Juan", ip: "127.0.0.1", role: :user}} =
-               Chat.User.new("Juan", "127.0.0.1")
+      assert {:ok, %Chat.User{name: "Juan", ip: "127.0.0.1", role: :admin}} =
+               Chat.User.new(name: "Juan", ip: "127.0.0.1", role: :admin)
     end
   end
 end

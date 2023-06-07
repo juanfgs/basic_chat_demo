@@ -3,16 +3,20 @@ defmodule Chat.User do
   This handles the users for our chat
   """
 
-  defstruct [:name, :ip, :role]
+  defstruct [:name, :ip, role: :user]
   @enforce_keys [:name, :ip, :role]
 
   @type t :: %__MODULE__{}
 
-  @spec new(String.t(), String.t(), atom()) :: t()
+  @spec new(keyword()) :: t()
 
-  def new(name, ip, role \\ :user)
+  def new(opts)
 
-  def new(name, ip, role) do
+  def new(name: name, ip: ip, role: role) do
     {:ok, %__MODULE__{name: name, ip: ip, role: role}}
+  end
+
+  def new(name: name, ip: ip) do
+    {:ok, %__MODULE__{name: name, ip: ip}}
   end
 end

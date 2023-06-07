@@ -46,34 +46,43 @@ defmodule Chat do
   end
 
   def handle_call(
-        {:register_user, [name: name, ip: ip, role: role]},
+        {:register_user, user_data},
         _from,
         state
       ) do
-    {:ok, user} = User.new(name, ip, role)
+    try do
+      {:ok, user} = User.new(user_data)
 
-    case State.register_user(state, user) do
-      {:ok, new_state} ->
-        {:reply, {:ok, user}, new_state, state.settings.timeout}
+      case State.register_user(state, user) do
+        {:ok, new_state} ->
+          {:reply, {:ok, user}, new_state, state.settings.timeout}
 
-      {:error, reason} ->
-        {:reply, {:error, reason}, state, state.settings.timeout}
+        {:error, reason} ->
+          {:reply, {:error, reason}, state, state.settings.timeout}
+      end
+    rescue
+      FunctionClauseError -> {:reply, {:error, :invalid_arguments}, state, state.settings.timeout}
     end
   end
 
   def handle_call(
-        {:unregister_user, [name: name, ip: ip]},
+        {:unregister_user, user_data},
         _from,
         state
       ) do
-    {:ok, user} = User.new(name, ip)
 
-    case State.unregister_user(state, user) do
-      {:ok, new_state} ->
-        {:reply, {:ok}, new_state, state.settings.timeout}
+    try do
+    {:ok, user} = User.new(user_data)
 
-      {:error, reason} ->
-        {:reply, {:error, reason}, state, state.settings.timeout}
+      case State.unregister_user(state, user) do
+        {:ok, new_state} ->
+          {:reply, :ok, new_state, state.settings.timeout}
+
+        {:error, reason} ->
+          {:reply, {:error, reason}, state, state.settings.timeout}
+      end
+    rescue
+      FunctionClauseError -> {:reply, {:error, :invalid_arguments}, state, state.settings.timeout}
     end
   end
 

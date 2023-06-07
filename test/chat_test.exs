@@ -12,9 +12,13 @@ defmodule ChatTest do
   end
 
   describe "register_user/1" do
-    test "registering a user inserts it into our state" do
-      {:ok, pid} = Chat.start_link(%{timeout: 50})
+    setup do
 
+      {:ok, pid} = Chat.start_link(%{timeout: :infinity})
+      [pid: pid]
+    end
+
+    test "registering a user inserts it into our state with the correct data", %{pid: pid} do
       assert {:ok, user} = Chat.register_user(pid, name: "Juan", ip: "127.0.0.1", role: :admin)
 
       assert user.name == "Juan"
@@ -22,9 +26,11 @@ defmodule ChatTest do
       assert user.role == :admin
     end
 
-    test "register a user with the same name twice, returns error " do
-      {:ok, pid} = Chat.start_link(%{timeout: 50})
+    test "missing a required key returns an error", %{pid: pid} do
+      assert {:error, :invalid_arguments} = Chat.register_user(pid, name: "Juan")
+    end
 
+    test "register a user with the same name twice, returns error ", %{pid: pid} do
       assert {:ok, _user} = Chat.register_user(pid, name: "Juan", ip: "127.0.0.1", role: :admin)
 
       assert {:error, :username_already_taken} =
@@ -38,20 +44,18 @@ defmodule ChatTest do
       [pid: pid]
     end
 
-
     test "unregistered user cannot send chat", %{pid: pid} do
       {:ok, user} = Chat.register_user(pid, name: "Juan", ip: "127.0.0.1", role: :admin)
-      assert {:ok} = Chat.unregister_user(pid, [name: user.name, ip: user.ip])
+      assert :ok = Chat.unregister_user(pid, name: user.name, ip: user.ip)
       response = Chat.send_message(pid, user, "test")
       inspect(response)
     end
+
     test "returns not found when user doesn't exist", %{pid: pid} do
-      assert {:error, :user_not_found} = Chat.unregister_user(pid, [name: "pepe", ip: "123.234.231.213"])
+      assert {:error, :user_not_found} =
+               Chat.unregister_user(pid, name: "pepe", ip: "123.234.231.213")
     end
- 
-    
   end
-  
 
   describe "get_messages/1" do
     setup do
