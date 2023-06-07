@@ -19,14 +19,18 @@ defmodule BasicChat.Chat.StateTest do
 
   describe "append_message/2" do
     setup do
-      [state: %BasicChat.Chat.State{users: [%User{name: "Pepito", ip: "127.0.0.1", role: :admin}]}]
+      [
+        state: %BasicChat.Chat.State{
+          users: [%User{name: "Pepito", ip: "127.0.0.1", role: :admin}]
+        }
+      ]
     end
 
     test "it appends the message to the message collection", %{
       state: %BasicChat.Chat.State{users: [user]} = state
     } do
       {:ok, state} = BasicChat.Chat.State.append_message(state, user, "I live Again!!")
-      assert List.first(state.messages).message == "I live Again!!" 
+      assert List.first(state.messages).message == "I live Again!!"
     end
   end
 end

@@ -2,6 +2,7 @@ defmodule BasicChat.ChatTest do
   use ExUnit.Case
   doctest BasicChat.Chat
   alias BasicChat.Chat
+
   describe "start_link/1" do
     test "Spawns a process" do
       {:ok, pid} = Chat.start_link(%{timeout: 50})
@@ -173,15 +174,12 @@ defmodule BasicChat.ChatTest do
       {:ok, [messages: goldmask_messages]} = Chat.get_messages(pid, goldmask)
       {:ok, [messages: public_messages]} = Chat.get_messages(pid)
 
-
       assert Enum.any?(
                public_messages,
                fn message ->
                  message.message == "Arise ye tarnished!!!"
                end
              ) == false
-
-
 
       assert Enum.any?(
                dungeater_messages,

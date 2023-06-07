@@ -101,11 +101,10 @@ defmodule BasicChat.Chat do
   def handle_call(:get_messages, _from, state) do
     {:reply, {:ok, [messages: State.get_messages(state)]}, state, state.settings.timeout}
   end
-  def handle_call({:get_messages, user }, _from, state) do
+
+  def handle_call({:get_messages, user}, _from, state) do
     {:reply, {:ok, [messages: State.get_messages(state, user)]}, state, state.settings.timeout}
   end
-
-
 
   def handle_call({:send_message, user, msg}, _from, state) do
     case State.append_message(state, user, msg) do
