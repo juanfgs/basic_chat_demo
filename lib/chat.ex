@@ -1,14 +1,14 @@
-defmodule Chat do
+defmodule BasicChat.Chat do
   @moduledoc """
   This is the server for our chat
   """
-  alias Chat.Message
-  alias Chat.State
-  alias Chat.User
+  alias BasicChat.Chat.Message
+  alias BasicChat.Chat.State
+  alias BasicChat.Chat.User
 
   use GenServer
 
-  @type server_state :: Chat.State.t()
+  @type server_state :: BasicChat.Chat.State.t()
   @type initial_arguments :: %{timeout: pos_integer()}
   @spec start_link(initial_arguments()) :: {:ok, pid()} | {:error, atom}
 

@@ -1,5 +1,5 @@
-defmodule Chat.Message do
-  alias Chat.User
+defmodule BasicChat.Chat.Message do
+  alias BasicChat.Chat.User
   defstruct [:author, :message, :timestamp, recipient: :all]
   @enforced_keys [:author, :message, :timestamp]
   @type t :: %__MODULE__{}

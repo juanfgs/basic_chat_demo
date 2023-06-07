@@ -1,4 +1,4 @@
-defmodule BasicChat.MixProject do
+defmodule BasicBasicChat.Chat.MixProject do
   use Mix.Project
 
   def project do

@@ -1,7 +1,7 @@
-defmodule ChatTest do
+defmodule BasicChat.ChatTest do
   use ExUnit.Case
-  doctest Chat
-
+  doctest BasicChat.Chat
+  alias BasicChat.Chat
   describe "start_link/1" do
     test "Spawns a process" do
       {:ok, pid} = Chat.start_link(%{timeout: 50})

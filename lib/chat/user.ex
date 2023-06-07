@@ -1,4 +1,4 @@
-defmodule Chat.User do
+defmodule BasicChat.Chat.User do
   @moduledoc """
   This handles the users for our chat
   """

@@ -1,7 +1,7 @@
-defmodule Chat.State do
+defmodule BasicChat.Chat.State do
   defstruct users: [], messages: [], settings: []
-  alias Chat.User
-  alias Chat.Message
+  alias BasicChat.Chat.User
+  alias BasicChat.Chat.Message
   @type t :: %__MODULE__{}
   @spec new(keyword()) :: t()
   def new(settings \\ []) do
