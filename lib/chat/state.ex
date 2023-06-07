@@ -24,6 +24,18 @@ defmodule Chat.State do
     end
   end
 
+  @spec unregister_user(t(), Chat.User.t()) :: {:ok, t()} | {:error, atom}
+  def unregister_user(%__MODULE__{users: users} = state, user) do
+    if username_exists?(state, user.name) do
+      filtered_users = Enum.reject(users, fn u ->
+        u.name == user.name && u.ip == user.ip
+      end)
+      {:ok, %__MODULE__{state | users: filtered_users}}
+    else
+      {:error, :user_not_found}
+    end
+  end
+
   @spec append_message(t(), Chat.User.t(), String.t()) :: {:ok, t()} | {:error, atom}
   def append_message(%__MODULE__{messages: messages} = state, user, message) do
     if username_exists?(state, user.name) do

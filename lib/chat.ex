@@ -23,6 +23,11 @@ defmodule Chat do
     GenServer.call(pid, {:register_user, user})
   end
 
+  @spec register_user(pid(), keyword()) :: {:ok, any} | {:error, atom}
+  def unregister_user(pid, user) do
+    GenServer.call(pid, {:unregister_user, user})
+  end
+
   @spec get_messages(pid()) :: {:ok, list(any)} | {:error, atom}
   def get_messages(pid) do
     GenServer.call(pid, :get_messages)
@@ -43,7 +48,7 @@ defmodule Chat do
   def handle_call(
         {:register_user, [name: name, ip: ip, role: role]},
         _from,
-        %{users: users} = state
+        state
       ) do
     {:ok, user} = User.new(name, ip, role)
 
@@ -56,12 +61,33 @@ defmodule Chat do
     end
   end
 
+  def handle_call(
+        {:unregister_user, [name: name, ip: ip]},
+        _from,
+        state
+      ) do
+    {:ok, user} = User.new(name, ip)
+
+    case State.unregister_user(state, user) do
+      {:ok, new_state} ->
+        {:reply, {:ok}, new_state, state.settings.timeout}
+
+      {:error, reason} ->
+        {:reply, {:error, reason}, state, state.settings.timeout}
+    end
+  end
+
   def handle_call(:get_messages, _from, state) do
     {:reply, {:ok, [messages: state.messages]}, state, state.settings.timeout}
   end
 
   def handle_call({:send_message, user, msg}, _from, state) do
-    {:ok, new_state} = State.append_message(state, user, msg)
-    {:reply, :ok, new_state, new_state.settings.timeout}
+    case State.append_message(state, user, msg) do
+      {:ok, new_state} ->
+        {:reply, :ok, new_state, new_state.settings.timeout}
+
+      {:error, reason} ->
+        {:reply, {:error, reason}, state, state.settings.timeout}
+    end
   end
 end

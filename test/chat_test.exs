@@ -32,6 +32,27 @@ defmodule ChatTest do
     end
   end
 
+  describe "unregister_user/1" do
+    setup do
+      {:ok, pid} = Chat.start_link(%{timeout: :infinity})
+      [pid: pid]
+    end
+
+
+    test "unregistered user cannot send chat", %{pid: pid} do
+      {:ok, user} = Chat.register_user(pid, name: "Juan", ip: "127.0.0.1", role: :admin)
+      assert {:ok} = Chat.unregister_user(pid, [name: user.name, ip: user.ip])
+      response = Chat.send_message(pid, user, "test")
+      inspect(response)
+    end
+    test "returns not found when user doesn't exist", %{pid: pid} do
+      assert {:error, :user_not_found} = Chat.unregister_user(pid, [name: "pepe", ip: "123.234.231.213"])
+    end
+ 
+    
+  end
+  
+
   describe "get_messages/1" do
     setup do
       {:ok, pid} = Chat.start_link(%{timeout: :infinity})
