@@ -13,7 +13,6 @@ defmodule ChatTest do
 
   describe "register_user/1" do
     setup do
-
       {:ok, pid} = Chat.start_link(%{timeout: :infinity})
       [pid: pid]
     end
@@ -147,6 +146,56 @@ defmodule ChatTest do
       Chat.send_message(pid, user, "I live again!!")
       {:ok, [messages: messages]} = Chat.get_messages(pid)
       assert List.first(messages).recipient == :all
+    end
+  end
+
+  describe "send_message/4" do
+    setup do
+      {:ok, pid} = Chat.start_link(%{timeout: 50})
+      [pid: pid]
+    end
+
+    test "sends a private message", %{pid: pid} do
+      {:ok, user} =
+        pid
+        |> Chat.register_user(name: "Elden Ring narrator", ip: "127.0.0.1", role: :admin)
+
+      {:ok, goldmask} =
+        pid
+        |> Chat.register_user(name: "Ever-glowing Goldmask", ip: "192.168.1.77", role: :user)
+
+      {:ok, dungeater} =
+        pid
+        |> Chat.register_user(name: "Loathsome Dungeater", ip: "192.168.1.123", role: :user)
+
+      Chat.send_message(pid, user, "Arise ye tarnished!!!", goldmask)
+      {:ok, [messages: dungeater_messages]} = Chat.get_messages(pid, dungeater)
+      {:ok, [messages: goldmask_messages]} = Chat.get_messages(pid, goldmask)
+      {:ok, [messages: public_messages]} = Chat.get_messages(pid)
+
+
+      assert Enum.any?(
+               public_messages,
+               fn message ->
+                 message.message == "Arise ye tarnished!!!"
+               end
+             ) == false
+
+
+
+      assert Enum.any?(
+               dungeater_messages,
+               fn message ->
+                 message.message == "Arise ye tarnished!!!"
+               end
+             ) == false
+
+      assert Enum.any?(
+               goldmask_messages,
+               fn message ->
+                 message.message == "Arise ye tarnished!!!"
+               end
+             ) == true
     end
   end
 end

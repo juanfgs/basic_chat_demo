@@ -28,14 +28,27 @@ defmodule Chat do
     GenServer.call(pid, {:unregister_user, user})
   end
 
-  @spec get_messages(pid()) :: {:ok, list(any)} | {:error, atom}
-  def get_messages(pid) do
+  @spec get_messages(pid(), User.t() | nil) :: {:ok, list(any)} | {:error, atom}
+
+  def get_messages(pid, user \\ nil)
+
+  def get_messages(pid, nil) do
     GenServer.call(pid, :get_messages)
   end
 
-  @spec send_message(pid(), User.t(), String.t()) :: {:ok} | {:error, atom}
-  def send_message(pid, user, message) do
+  def get_messages(pid, user) do
+    GenServer.call(pid, {:get_messages, user})
+  end
+
+  @spec send_message(pid(), User.t(), String.t(), User.t() | nil) :: {:ok} | {:error, atom}
+  def send_message(pid, user, message, recipient \\ nil)
+
+  def send_message(pid, user, message, nil) do
     GenServer.call(pid, {:send_message, user, message})
+  end
+
+  def send_message(pid, user, message, recipient) do
+    GenServer.call(pid, {:send_message, user, message, recipient})
   end
 
   # Server Callbacks
@@ -70,9 +83,8 @@ defmodule Chat do
         _from,
         state
       ) do
-
     try do
-    {:ok, user} = User.new(user_data)
+      {:ok, user} = User.new(user_data)
 
       case State.unregister_user(state, user) do
         {:ok, new_state} ->
@@ -87,11 +99,26 @@ defmodule Chat do
   end
 
   def handle_call(:get_messages, _from, state) do
-    {:reply, {:ok, [messages: state.messages]}, state, state.settings.timeout}
+    {:reply, {:ok, [messages: State.get_messages(state)]}, state, state.settings.timeout}
   end
+  def handle_call({:get_messages, user }, _from, state) do
+    {:reply, {:ok, [messages: State.get_messages(state, user)]}, state, state.settings.timeout}
+  end
+
+
 
   def handle_call({:send_message, user, msg}, _from, state) do
     case State.append_message(state, user, msg) do
+      {:ok, new_state} ->
+        {:reply, :ok, new_state, new_state.settings.timeout}
+
+      {:error, reason} ->
+        {:reply, {:error, reason}, state, state.settings.timeout}
+    end
+  end
+
+  def handle_call({:send_message, user, msg, recipient}, _from, state) do
+    case State.append_message(state, user, msg, recipient) do
       {:ok, new_state} ->
         {:reply, :ok, new_state, new_state.settings.timeout}
 
