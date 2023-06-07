@@ -45,13 +45,14 @@ defmodule Chat do
         _from,
         %{users: users} = state
       ) do
-    unless State.username_exists?(state, name) do
-      case User.new(name, ip, role) do
-        {:ok, user} ->
-          {:reply, {:ok, user}, %{state | users: [user | users]}, state.settings.timeout}
-      end
-    else
-      {:reply, {:error, :username_already_taken}, state, state.settings.timeout}
+    {:ok, user} = User.new(name, ip, role)
+
+    case State.register_user(state, user) do
+      {:ok, new_state} ->
+        {:reply, {:ok, user}, new_state, state.settings.timeout}
+
+      {:error, reason} ->
+        {:reply, {:error, reason}, state, state.settings.timeout}
     end
   end
 
