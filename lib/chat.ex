@@ -2,7 +2,6 @@ defmodule BasicChat.Chat do
   @moduledoc """
   This is the server for our chat
   """
-  alias BasicChat.Chat.Message
   alias BasicChat.Chat.State
   alias BasicChat.Chat.User
 
