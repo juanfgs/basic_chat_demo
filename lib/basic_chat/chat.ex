@@ -8,13 +8,13 @@ defmodule BasicChat.Chat do
   use GenServer
 
   @type server_state :: BasicChat.Chat.State.t()
-  @type initial_arguments :: %{timeout: pos_integer()}
+  @type initial_arguments :: %{timeout: pos_integer() | atom}
   @spec start_link(initial_arguments()) :: {:ok, pid()} | {:error, atom}
 
   @default_args %{timeout: :infinity}
 
-  def start_link(args) do
-    GenServer.start_link(__MODULE__, args)
+  def start_link(args \\ @default_args, opts \\ []) do
+    GenServer.start_link(__MODULE__, args, opts)
   end
 
   @spec register_user(pid(), keyword()) :: {:ok, any} | {:error, atom}
@@ -25,6 +25,11 @@ defmodule BasicChat.Chat do
   @spec register_user(pid(), keyword()) :: {:ok, any} | {:error, atom}
   def unregister_user(pid, user) do
     GenServer.call(pid, {:unregister_user, user})
+  end
+
+  @spec get_user(pid(), String.t()) :: {:ok, User.t()} | {:error, atom}
+  def get_user(pid, name) do
+    GenServer.call(pid, {:get_user, name})
   end
 
   @spec get_messages(pid(), User.t() | nil) :: {:ok, list(any)} | {:error, atom}
@@ -52,9 +57,13 @@ defmodule BasicChat.Chat do
 
   # Server Callbacks
   @spec init(initial_arguments()) :: {:ok, server_state, any} | {:stop, any}
-  def init(args \\ @default_args) do
+  def init(args) do
     {:ok, state} = State.new(args)
     {:ok, state, args[:timeout]}
+  end
+
+  def child_spec(opts) do
+    %{id: BasicChat.Chat, start: {BasicChat.Chat, :start_link, opts}}
   end
 
   def handle_call(
@@ -94,6 +103,16 @@ defmodule BasicChat.Chat do
       end
     rescue
       FunctionClauseError -> {:reply, {:error, :invalid_arguments}, state, state.settings.timeout}
+    end
+  end
+
+  def handle_call({:get_user, name}, _from, state) do
+    case State.get_user(state, name) do
+      {:ok, user} ->
+        {:reply, {:ok, user}, state, state.settings.timeout}
+
+      {:error, reason} ->
+        {:reply, {:error, reason}, state, state.settings.timeout}
     end
   end
 

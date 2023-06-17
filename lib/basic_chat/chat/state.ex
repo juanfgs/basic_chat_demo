@@ -34,6 +34,22 @@ defmodule BasicChat.Chat.State do
     end
   end
 
+  @spec get_user(t(), String.t()) :: {:ok, User.t()} | {:error, atom}
+  def get_user(%__MODULE__{users: users}, name) do
+    user =
+      users
+      |> Enum.filter(fn user ->
+        user.name == name 
+      end)
+      |> List.first()
+
+    if user == nil do
+      {:error, :user_does_not_exist}
+    else
+      {:ok, user}
+    end
+  end
+
   @spec unregister_user(t(), User.t()) :: {:ok, t()} | {:error, atom}
   def unregister_user(%__MODULE__{users: users} = state, user) do
     if username_exists?(state, user.name) do

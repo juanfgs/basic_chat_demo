@@ -1,5 +1,6 @@
 defmodule BasicChat.Chat.Message do
   alias BasicChat.Chat.User
+  @derive {Jason.Encoder, only: [:author,:message,:timestamp]}
   defstruct [:author, :message, :timestamp, recipient: :all]
   @enforced_keys [:author, :message, :timestamp]
   @type t :: %__MODULE__{}

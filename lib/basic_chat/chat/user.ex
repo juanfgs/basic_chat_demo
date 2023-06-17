@@ -3,6 +3,7 @@ defmodule BasicChat.Chat.User do
   This handles the users for our chat
   """
 
+  @derive {Jason.Encoder, only: [:name, :ip, :role]}
   defstruct [:name, :ip, role: :user]
   @enforce_keys [:name, :ip, :role]
 
